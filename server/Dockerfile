@@ -1,24 +1,27 @@
-FROM python:3.10 as requirements-stage
-
-WORKDIR /tmp
-
-RUN pip install poetry
-
-COPY ./pyproject.toml ./poetry.lock* /tmp/
-
-RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
-
 FROM python:3.10
 
-ENV PATH="${PATH}:/root/.local/bin"
+ENV POETRY_VERSION=1.6.1 \
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_NO_INTERACTION=1
 
-WORKDIR /code
+WORKDIR /app
 
-COPY --from=requirements-stage /tmp/requirements.txt /code/requirements.txt
+RUN apt-get update && apt-get install -y \
+    curl \
+    libgl1 \
+    libglib2.0-0 \
+    && curl -sSL https://install.python-poetry.org | python3 - \
+    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+COPY pyproject.toml poetry.lock /app/
 
-COPY ./app /code/app
+RUN poetry install --no-root --no-dev \
+    && apt-get remove --purge -y curl \
+    && rm -rf /root/.local/bin/poetry
 
-#CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"] production
-CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload"]
+COPY . /app
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
