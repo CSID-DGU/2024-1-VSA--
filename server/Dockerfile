@@ -15,15 +15,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml poetry.lock /app/
-RUN poetry install --no-root --no-dev \
-    && apt-get remove --purge -y curl \
-    && rm -rf /root/.local/bin/poetry
+RUN poetry install --no-root --no-dev
 
 COPY . /app
 COPY .env /app/.env
 COPY alembic.ini /app/alembic.ini
-COPY alembic /app/alembic
 
 EXPOSE 8000
 
-CMD ["bash", "-c", "poetry run alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
