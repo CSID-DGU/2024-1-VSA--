@@ -55,19 +55,19 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            if [ ! -d "/home/ubuntu/server" ]; then
+            if [ ! -d "/home/ubuntu/2024-1-VSA-a2b1" ]; then
               echo "Cloning repository..."
-              git clone https://github.com/CSID-DGU/2024-1-VSA-a2b1.git /home/ubuntu/server
+              git clone https://github.com/CSID-DGU/2024-1-VSA-a2b1.git /home/ubuntu
             fi
 
-            cd /home/ubuntu/server
+            cd /home/ubuntu/2024-1-VSA-a2b1
             git pull origin main
 
             # deploy.sh 확인 및 실행
-            if [ -f "./scripts/deploy.sh" ]; then
-              chmod +x ./scripts/deploy.sh
-              ./scripts/deploy.sh
+            if [ -f "server/scripts/deploy.sh" ]; then
+              chmod +x server/scripts/deploy.sh
+              server/scripts/deploy.sh
             else
-              echo "Error: ./scripts/deploy.sh not found!"
+              echo "Error: server/scripts/deploy.sh not found!"
               exit 1
             fi
