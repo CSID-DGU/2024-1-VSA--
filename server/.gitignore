@@ -24,7 +24,7 @@ venv/
 .Python
 
 # poetry 관련
-poetry.lock
+#poetry.lock
 .venv/
 .mypy_cache/
 .dmypy.json
