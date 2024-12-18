@@ -55,7 +55,20 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # 서버 디렉터리 확인 및 리포지토리 클론
+            if [ ! -d "/home/ubuntu/server" ]; then
+              echo "Cloning repository..."
+              git clone https://github.com/<YOUR_REPO_OWNER>/<YOUR_REPO_NAME>.git /home/ubuntu/server
+            fi
+
             cd /home/ubuntu/server
             git pull origin main
-            chmod +x ./scripts/deploy.sh
-            ./scripts/deploy.sh
+
+            # deploy.sh 확인 및 실행
+            if [ -f "./scripts/deploy.sh" ]; then
+              chmod +x ./scripts/deploy.sh
+              ./scripts/deploy.sh
+            else
+              echo "Error: ./scripts/deploy.sh not found!"
+              exit 1
+            fi
