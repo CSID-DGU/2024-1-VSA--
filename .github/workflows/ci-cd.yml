@@ -55,10 +55,9 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 서버 디렉터리 확인 및 리포지토리 클론
             if [ ! -d "/home/ubuntu/server" ]; then
               echo "Cloning repository..."
-              git clone https://github.com/<YOUR_REPO_OWNER>/<YOUR_REPO_NAME>.git /home/ubuntu/server
+              git clone https://github.com/CSID-DGU/2024-1-VSA-a2b1.git /home/ubuntu/server
             fi
 
             cd /home/ubuntu/server
