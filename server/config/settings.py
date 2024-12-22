@@ -34,6 +34,8 @@ DEBUG = env('DEBUG')
 REST_USE_JWT=True
 TOKEN_MODEL=None
 
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -54,7 +56,7 @@ INSTALLED_APPS = [
     
     #앱
     'accounts',
-    'video',
+    #'video',
 ]
 SITE_ID = 1
 
