@@ -65,14 +65,14 @@ REST_FRAMEWORK = {
 }
 
 REST_AUTH_SERIALIZERS = {
-    'JWT_SERIALIZER': 'dj_rest_auth.serializers.JWTSerializer',
-    'LOGIN_SERIALIZER': 'dj_rest_auth.serializers.LoginSerializer',
+    'JWT_SERIALIZER': 'accounts.serializers.CustomJWTSerializer',
 }
+
+ACCOUNT_PASSWORD_MIN_LENGTH = 1  # 최소 길이 설정
 
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'accounts.serializers.SinglePasswordRegisterSerializer',
 }
-
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),

@@ -1,6 +1,8 @@
 from django.urls import path, include
+from .views import CustomRegisterView, CustomLoginView
 
 urlpatterns = [
-    path('', include('dj_rest_auth.urls')),  # 로그인/로그아웃, JWT 토큰 관리
-    path('registration/', include('dj_rest_auth.registration.urls')),  # 회원가입
+    path('register/', CustomRegisterView.as_view(), name='custom_rest_register'),
+    path('login/', CustomLoginView.as_view(), name='custom_login'),
+
 ]
