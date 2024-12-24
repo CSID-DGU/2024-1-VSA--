@@ -123,14 +123,14 @@ def ProcessImage(img, args, model_args):
     except Exception as e:
         print(f"Error during mosaic: {e}")
 
-    # DrawRectImg
-    try:
-        processed_img = DrawRectImg(img, bboxes, face_ids)
-    except Exception as e:
-        print(f"Error during DrawRectImg: {e}")
-        processed_img = img
+    # # DrawRectImg # 출력할때 boundingbox 나오게 하는거 최종코드에선 뺄수있음음
+    # try:
+    #     processed_img = DrawRectImg(img, bboxes, face_ids)
+    # except Exception as e:
+    #     print(f"Error during DrawRectImg: {e}")
+    #     processed_img = img
 
-    return processed_img
+    return img
 
 
 def main(args):
