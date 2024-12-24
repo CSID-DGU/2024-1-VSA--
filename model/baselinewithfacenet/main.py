@@ -16,7 +16,7 @@ from retinaface_utils.utils.model_utils import load_model
 from retinaface_utils.models.retinaface import RetinaFace
 from retinaface_utils.data.config import cfg_mnet
 
-
+# python main.py --video_path ../data/dest_images/ex2.mp4
 def init(args):
     model_args = {}
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -65,7 +65,24 @@ def yolov8_detection(model, img):
         bboxes.append([x_min, y_min, x_max, y_max])
     return bboxes
 
+import subprocess
 
+def merge_audio_video(video_path, processed_video_path, save_path):
+    try:
+        command = [
+            "ffmpeg",
+            "-i", processed_video_path,
+            "-i", video_path,
+            "-c:v", "copy",
+            "-c:a", "aac",
+            "-map", "0:v:0",
+            "-map", "1:a:0",
+            save_path
+        ]
+        subprocess.run(command, check=True)
+        print(f"Video saved with audio at: {save_path}")
+    except Exception as e:
+        print(f"Error during audio-video merging: {e}")
 
 def ProcessImage(img, args, model_args):
     process_target = args['PROCESS_TARGET']
@@ -116,41 +133,6 @@ def ProcessImage(img, args, model_args):
     return processed_img
 
 
-
-
-# def ProcessImage(img, args, model_args):
-#     process_target = args['PROCESS_TARGET']
-
-#     # Object Detection
-#     bboxes = ML.Detection(img, args, model_args)
-#     if bboxes is None:
-#         if args['DETECTOR'] == 'mtcnn':
-#             if process_target == 'Video': # torchvision
-#                 img = img.numpy()
-#             # Color channel: RGB -> BGR
-#             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-#         return img
-
-#     # Object Recognition
-#     face_ids = ML.Recognition(img, bboxes, args, model_args)
-
-#     if args['DETECTOR'] == 'mtcnn':
-#         # 모자이크 전처리
-#         if process_target == 'Video': # torchvision
-#             img = img.numpy()
-#         # Color channel: RGB -> BGR
-#         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-    
-#     # Mosaic
-#     img = Mosaic(img, bboxes, face_ids, n=10)
-
-#     # 특정인에 bbox와 name을 보여주고 싶으면
-#     processed_img = DrawRectImg(img, bboxes, face_ids)
-
-#     return processed_img
-#     # return img
-
-
 def main(args):
     model_args = init(args)
 
@@ -172,44 +154,29 @@ def main(args):
     # =================== Video =======================
     elif args['PROCESS_TARGET'] == 'Video':
         video_path = args['VIDEO_PATH']
-        cap = cv2.VideoCapture(video_path)
+        processed_video_path = args['SAVE_DIR'] + '/processed_video.mp4'
+        save_path = args['SAVE_DIR'] + '/output_with_audio.mp4'
 
-        # Input video resolution
-        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        print(f"Input video resolution: {frame_width}x{frame_height}")
+        if args['PROCESS_TARGET'] == 'Video':
+            cap = cv2.VideoCapture(video_path)
+            frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-        # Define the codec and create VideoWriter object
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter(args['SAVE_DIR'] + '/output.mp4', fourcc, 24.0, (frame_width, frame_height))
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            out = cv2.VideoWriter(processed_video_path, fourcc, fps, (frame_width, frame_height))
 
-        start = time()
-        frame_count = 0
-
-        if args['DETECTOR'] in ['mtcnn', 'yolov8']:
-            print(f"Using {args['DETECTOR']} for video processing.")
             while True:
                 ret, img = cap.read()
                 if not ret:
-                    print("End of video or cannot read frame.")
                     break
-
-                # Process the frame
                 img = ProcessImage(img, args, model_args)
-                if img is not None:
-                    out.write(img)
-                    frame_count += 1
-                else:
-                    print("Processed frame is None.")
-        else:
-            print(f"Unknown detector: {args['DETECTOR']}")
+                out.write(img)
 
-        cap.release()
-        out.release()
+            cap.release()
+            out.release()
 
-        print(f"Processed {frame_count} frames.")
-        print(f"Video saved to: {args['SAVE_DIR']}/output.mp4")
-        print('done.', time() - start)
+            merge_audio_video(video_path, processed_video_path, save_path)
     # ====================== Video ===========================
 
 
