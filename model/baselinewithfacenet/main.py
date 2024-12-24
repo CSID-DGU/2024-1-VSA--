@@ -171,7 +171,7 @@ def main(args):
 
     # =================== Video =======================
     elif args['PROCESS_TARGET'] == 'Video':
-        video_path = '../data/dest_images/video.mp4'
+        video_path = args['VIDEO_PATH']
         cap = cv2.VideoCapture(video_path)
 
         # Input video resolution
