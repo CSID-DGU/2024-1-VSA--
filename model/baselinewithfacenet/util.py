@@ -56,54 +56,15 @@ def Get_normal_bbox(size, bboxes):
     return new_bboxes
 
 
-def Mosaic(img, bboxes, face_ids, n):
-    # filling NxN kernel's max or average value
-    # img: original image
-    # bboxes: mosaic target positions
-    # n: kernel size
+def Mosaic(img, bboxes, face_ids):
+    output_img = img.copy()
     for bbox, face_id in zip(bboxes, face_ids):
-        #print(f"Original bbox: {bbox}, type: {type(bbox)}")  # 디버깅 메시지 추가
-        #print(f"Face ID: {face_id}")  # 디버깅 메시지 추가
-
-        try:
-            bbox = np.array(bbox, dtype=float)  # 배열로 강제 변환
-            bbox = np.round(bbox).astype(int)   # 정수 변환
-            #print(f"Processed bbox: {bbox}")  # 디버깅 메시지 추가
-        except Exception as e:
-            print(f"Error processing bbox: {bbox}, Exception: {e}")
-            continue
-
         if face_id == 'unknown':
-            if bbox[2] - bbox[0] < n or bbox[3] - bbox[1] < n:
-                print(f"Skipping small bbox: {bbox}")
-                continue
-
-            roi = img[bbox[1]:bbox[3], bbox[0]:bbox[2]]
-            roi = cv2.resize(roi, ((bbox[2] - bbox[0]) // n, (bbox[3] - bbox[1]) // n),
-                             interpolation=cv2.INTER_AREA)
-            roi = cv2.resize(roi, ((bbox[2] - bbox[0]), (bbox[3] - bbox[1])),
-                             interpolation=cv2.INTER_NEAREST)
-            img[bbox[1]:bbox[3], bbox[0]:bbox[2]] = roi
-
-    return img
-    # for bbox, face_id in zip(bboxes, face_ids):
-    #     if face_id == 'unknown':
-    #         bbox = np.round(bbox).astype(int)
-    #         # 대상이 너무 작아 모자이크가 안된다면 pass
-    #         if bbox[2] - bbox[0] < n or bbox[3] - bbox[1] < n:
-    #             continue
-    #         roi = img[bbox[1]:bbox[3], bbox[0]:bbox[2]] 
-    #        # 1/n 비율로 축소
-    #         roi = cv2.resize(roi, ((bbox[2] - bbox[0])//n,
-    #                             (bbox[3] - bbox[1])//n),
-    #                             interpolation=cv2.INTER_AREA)
-    #         # 원래 크기로 확대
-    #         roi = cv2.resize(roi, ((bbox[2] - bbox[0]),
-    #                             (bbox[3] - bbox[1])),
-    #                             interpolation=cv2.INTER_NEAREST)
-    #         img[bbox[1]:bbox[3], bbox[0]:bbox[2]] = roi
-
-    # return img
+            x0, y0, x1, y1 = map(int, bbox)
+            roi = img[y0:y1, x0:x1]
+            blurred_roi = cv2.GaussianBlur(roi, (51, 51), 0)
+            output_img[y0:y1, x0:x1] = blurred_roi
+    return output_img
 
 
 def DrawRectImg(img, bboxes, face_ids):
