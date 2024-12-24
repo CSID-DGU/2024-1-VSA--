@@ -7,6 +7,29 @@ from django.conf import settings
 
 from django.views.decorators.csrf import csrf_exempt
 import os
+import json
+
+@csrf_exempt
+def login_view(request):
+    if request.method == "POST":
+        try:
+            # 요청 본문에서 JSON 데이터 읽기
+            data = json.loads(request.body)
+            user_id = data.get("id")
+            password = data.get("pw")
+
+            # 유효성 검사
+            if not user_id or not password:
+                return JsonResponse({"error": "Missing fields"}, status=400)
+
+            # 처리 로직 (예: 사용자 생성, 데이터베이스 저장 등)
+            # 여기에 실제 비즈니스 로직을 추가하세요.
+            return JsonResponse({"success": True, "message": "User registered successfully!"})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+    else:
+        return JsonResponse({"error": "Invalid method"}, status=405)
 
 @api_view(['GET'])
 def index(request):
