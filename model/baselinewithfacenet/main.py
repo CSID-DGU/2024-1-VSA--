@@ -16,7 +16,7 @@ from retinaface_utils.utils.model_utils import load_model
 from retinaface_utils.models.retinaface import RetinaFace
 from retinaface_utils.data.config import cfg_mnet
 
-# python main.py --video_path ../data/dest_images/ex2.mp4
+# python main.py --video_path ../data/dest_images/ex5.mp4
 def init(args):
     model_args = {}
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -101,13 +101,9 @@ def ProcessImage(img, args, model_args):
         bboxes = []
 
     # Check if bboxes is empty or None
-    if bboxes is None or len(bboxes) == 0:
-        print("No valid bboxes detected.")
-        if args['DETECTOR'] == 'mtcnn' and process_target == 'Video':
-            if not isinstance(img, np.ndarray):  # NumPy 배열인지 확인
-                img = img.numpy()
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        return img
+    if not bboxes or len(bboxes) == 0:  # 얼굴이 감지되지 않은 경우
+        print("No valid bboxes detected. Returning original frame.")
+        return img  # 원본 이미지를 반환
 
     # Object Recognition
     try:
@@ -115,27 +111,21 @@ def ProcessImage(img, args, model_args):
         print(f"Face IDs: {face_ids}")  # 디버깅 메시지 추가
     except Exception as e:
         print(f"Error during recognition: {e}")
-        face_ids = ['unknown'] * len(bboxes)
+        face_ids = ['unknown'] * len(bboxes)  # 얼굴이 감지되지 않으면 모든 face_id를 'unknown'으로 설정
 
     # Mosaic
     try:
-        img = Mosaic(img, bboxes, face_ids, n=10)
+        img = Mosaic(img, bboxes, face_ids)  # Mosaic 함수 호출
     except Exception as e:
         print(f"Error during mosaic: {e}")
-
-    # # DrawRectImg # 출력할때 boundingbox 나오게 하는거 최종코드에선 뺄수있음음
-    # try:
-    #     processed_img = DrawRectImg(img, bboxes, face_ids)
-    # except Exception as e:
-    #     print(f"Error during DrawRectImg: {e}")
-    #     processed_img = img
 
     return img
 
 
+
 def main(args):
     model_args = init(args)
-
+    start = time()
     # =================== Image =======================
     image_dir = args['IMAGE_DIR']
     if args['PROCESS_TARGET'] == 'Image':
@@ -156,7 +146,9 @@ def main(args):
         video_path = args['VIDEO_PATH']
         processed_video_path = args['SAVE_DIR'] + '/processed_video.mp4'
         save_path = args['SAVE_DIR'] + '/output_with_audio.mp4'
-
+        
+        
+        frame_count = 0
         if args['PROCESS_TARGET'] == 'Video':
             cap = cv2.VideoCapture(video_path)
             frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -172,11 +164,14 @@ def main(args):
                     break
                 img = ProcessImage(img, args, model_args)
                 out.write(img)
-
+                frame_count += 1
             cap.release()
             out.release()
 
             merge_audio_video(video_path, processed_video_path, save_path)
+                
+        print(f"Processed {frame_count} frames.")
+        print('done.', time() - start)
     # ====================== Video ===========================
 
 
