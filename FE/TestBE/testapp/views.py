@@ -15,8 +15,8 @@ def login_view(request):
         try:
             # 요청 본문에서 JSON 데이터 읽기
             data = json.loads(request.body)
-            user_id = data.get("id")
-            password = data.get("pw")
+            user_id = data.get("username")
+            password = data.get("password")
 
             # 유효성 검사
             if not user_id or not password:
@@ -38,14 +38,20 @@ def index(request):
 @api_view(['GET'])
 def getVideoList(request):
     if request.method == 'GET':
-        item = os.listdir("uploads")
+
         result = {
             "code": "200",
             "result": "SUCCESS",
             "message": "종목 코드 조회에 성공했습니다.",
-            "data": {
-                "videos": item
-            }
+            "data": [
+                {
+                    "id": 1,
+                    "video_file": "https://a2b1.s3.us-east-1.amazonaws.com/videos/KakaoTalk_20240229_151332945.mp4",
+                    "processed_video_file": "null",
+                    "status": "Pending",
+                    "created_at": "2024-12-25T18:45:44.610474+09:00"
+                }
+            ]
         }
 
         return Response(result)

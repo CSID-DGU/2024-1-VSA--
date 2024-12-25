@@ -7,6 +7,6 @@ urlpatterns = [
     
     path("api/upload", upload_video),
     path('api/download/<str:filename>/', download_video, name='download_video'), 
-    path("api/videos", getVideoList),
+    path("api/video", getVideoList),
     path('api/auth/register', login_view, name='login'),
 ]
