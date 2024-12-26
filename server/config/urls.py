@@ -10,7 +10,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/auth/', include('accounts.urls')),  # accounts 관련
-    #path('api/video/', include('accounts.urls')), # video 관련
+    path('api/video/', include('video.urls')), # video 관련
 ]
 
 if settings.DEBUG:

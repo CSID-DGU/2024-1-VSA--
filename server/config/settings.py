@@ -35,6 +35,7 @@ REST_USE_JWT=True
 TOKEN_MODEL=None
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+YOLO_MODEL_PATH = os.path.join(BASE_DIR, 'models/yolov8m-face.pt')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -56,7 +57,7 @@ INSTALLED_APPS = [
     
     #앱
     'accounts',
-    #'video',
+    'video',
 ]
 SITE_ID = 1
 
@@ -77,7 +78,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,                 # Refresh 토큰 갱신 시 새 토큰 제공
 }
@@ -213,7 +214,38 @@ AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazo
 STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
 
+YOLO_MODEL_PATH = os.path.join(BASE_DIR, 'models/yolov8n-face.pt')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s:%(lineno)d %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.utils.autoreload': {
+            'handlers': ['console'],
+            'level': 'WARNING',  # DEBUG 메시지 제외
+            'propagate': False,
+        },
+    },
+}
